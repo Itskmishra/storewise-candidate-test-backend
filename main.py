@@ -5,25 +5,39 @@ from typing import List
 from bullet import Bullet, colors, utils
 
 
+# class to store items
 class PurchaseItem(object):
     def __init__(self, option):
         self.price = option.p
         self.name = str(option)
 
+    # function to print name
+    def __str__(self):
+        return self.name
 
+    # function to get price of item
+    def get_price(self):
+        return self.price
+    
+# function to calculate total amount of order
 def get_total_order_amount(order: List[PurchaseItem]):
-
+    if len(order) <= 0:
+        raise TypeError("You need to order something before proceeding.")
+    total_amount = 0
+    # loop over th list and add total of the object to total_amount variable
+    for i in order:
+        total_amount += i.get_price()
+    # return error if total amount is not a valide positive value.
+    if total_amount <= 0:
+        raise ValueError("Amount of the order must have valid price.")
+    # return the total amount of the order
+    return total_amount
     """
     The total cost of all the items ordered
     """
 
-    raise NotImplementedError(
-        "REMOVE the error and RETURN the total amount for the order"
-    )
-
-
+# function to calculate how much service charge will be applied 
 def get_service_charge(order: List[PurchaseItem]):
-
     """
     For every Rs. 100, the service charge amount should increase by 1% of order amount, upto a max of 20%
     Eg:
@@ -34,9 +48,22 @@ def get_service_charge(order: List[PurchaseItem]):
         Order Amount = 3000, Service Charge = 600
     """
 
-    raise NotImplementedError(
-        "REMOVE the error and RETURN service charge amount for the order"
-    )
+    total_amount = 0
+    service_charge = 0
+    for i in order:
+        total_amount += i.get_price()
+    # calculate percentage of service charge on total_amount based on per 100 
+    # service charge %
+    service_charge_percent = total_amount / 100
+    # check the charge percentage.
+    if service_charge_percent > 20:
+        service_charge_percent = 20
+    if service_charge_percent < 1:
+        service_charge_percent = 0
+    # calculate total service charge
+    service_charge = total_amount * service_charge_percent / 100
+    return service_charge
+
 
 
 class Option(object):
@@ -60,6 +87,7 @@ class Option(object):
         return len(self.__str__())
 
 
+# ITEM'S and BEVERAGE'S
 MCDONALDS_FOOD_OPTIONS = [
     Option(d={"name": "Veg Burger", "price": 115.00}),
     Option(d={"name": "Veg Wrap", "price": 130.00}),
@@ -83,19 +111,17 @@ def get_option_from_result(result, options):
     for option in options:
         if str(option) == result:
             return option
-
     raise UnexpectedException
 
-
-def print_order(order):
-    print()
-
+# main function to calculate order and print it on the console.
+def print_order(order): 
     try:
+        # calculate total amount of the order
         total_amount = get_total_order_amount(order)
     except:
         traceback.print_exc()
         total_amount = "ERROR"
-
+    # calculate service charge based on the total amount.
     service_charge = "ERROR"
     if total_amount != "ERROR":
         try:
@@ -103,7 +129,7 @@ def print_order(order):
         except:
             traceback.print_exc()
             service_charge = "ERROR"
-
+    # print charges on console.
     utils.cprint(
         "Final Order", color=colors.foreground["green"], on=colors.background["yellow"]
     )
@@ -130,7 +156,7 @@ def print_order(order):
         on=colors.background["yellow"],
     )
 
-
+# Showing welcome line's
 print()
 utils.cprint(
     "Welcome to McDonalds on your shell :)",
@@ -148,7 +174,10 @@ utils.cprint(
     on=colors.background["white"],
 )
 print()
+# list to store selected items.
 order = []
+
+# loop's for showing options and beverage.
 while True:
     options = list(map(lambda x: str(x), MCDONALDS_FOOD_OPTIONS))
     bullet = Bullet(prompt="Add an item", choices=options, bullet="=> ")
@@ -177,5 +206,4 @@ while True:
 
 utils.clearConsoleUp(1)
 print()
-
 print_order(order)
